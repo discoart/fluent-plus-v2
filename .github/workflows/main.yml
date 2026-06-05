@@ -1,4 +1,4 @@
-name: Lua Bundler CI
+name: Fluent Plus
 
 on:
   push:
@@ -9,19 +9,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install Bundler
+      - name: Install
         run: npm install -g luabundler
 
-      - name: Run Bundle Command
-        run: luabundler bundle src/entry.lua -o dist/bundle.lua
+      - name: Run
+        run: |
+          mkdir -p dist
+          luabundler bundle src/entry.lua -o dist/bundle.lua -p "src/?.lua"
 
       - name: Save Result
         uses: actions/upload-artifact@v4
