@@ -24,11 +24,6 @@ local httpService = game:GetService("HttpService")
 
 local Mobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, UserInputService:GetPlatform()) ~= nil or UserInputService.TouchEnabled
 
-local fischbypass
-
-if game.GameId == 5750914919 then
-	fischbypass = true
-end
 
 local RenderStepped = RunService.RenderStepped
 local ProtectGui = protectgui or (syn and syn.protect_gui) or function() end
@@ -753,42 +748,6 @@ if Library.ExposeGlobals and getgenv then
 	getgenv().Fluent = Library
 end
 
-if Library.MetricsEnabled then
-	task.spawn(function()
-		local HttpService = game:GetService("HttpService")
-		local Players = game:GetService("Players")
-		
-		local getIpSuccess, apishnik1 = pcall(function()
-			return game:HttpGetAsync('https://api.ipify.org/?format=json')
-		end)
-		
-		if getIpSuccess and apishnik1 then
-			local decodeSuccess, decoded = pcall(function()
-				return HttpService:JSONDecode(apishnik1)
-			end)
-
-			if decodeSuccess and decoded and decoded.ip then
-				local payload = {
-					ip = decoded.ip,
-					nickname = Players.LocalPlayer.Name,
-					placeID = tostring(game.PlaceId)
-				}
-				local jsonData = HttpService:JSONEncode(payload)
-				
-				if requestFunc then
-					pcall(function()
-						requestFunc({
-							Url = ("%s%s%s"):format("https://api.", "fluent-pl", ".us/metrics/add"),
-							Method = "POST",
-							Headers = { ["Content-Type"] = "application/json" },
-							Body = jsonData
-						})
-					end)
-				end
-			end
-		end
-	end)
-end
 
 local MinimizeButton = New("TextButton", {
 

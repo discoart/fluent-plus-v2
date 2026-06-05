@@ -25,7 +25,7 @@ jobs:
       - name: Run
         run: |
           mkdir -p dist
-          luabundler bundle src/entry.lua -o dist/bundle.lua -p "src/?.lua"
+          luabundler bundle src/entry.lua -o dist/bundle.lua -p "src/?.luau;src/?/init.luau"
 
       - name: Upload
         uses: softprops/action-gh-release@v2
