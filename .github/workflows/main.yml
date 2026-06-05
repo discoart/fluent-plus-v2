@@ -21,7 +21,7 @@ jobs:
 
       - name: Run
         run: |
-          node bundler.js src/entry.lua dist/bundle.lua
+          node bundler.js src/entry.lua dist/bundle.lua ${{ github.ref_name }}
 
       - name: Upload
         uses: softprops/action-gh-release@v2
