@@ -19,13 +19,9 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install
-        run: npm install -g luabundler
-
       - name: Run
         run: |
-          mkdir -p dist
-          luabundler bundle src/entry.lua -o dist/bundle.lua -p "src/?.luau;src/?/init.luau"
+          node bundler.js src/entry.lua dist/bundle.lua
 
       - name: Upload
         uses: softprops/action-gh-release@v2
