@@ -17,8 +17,8 @@ const BANNER = `--[[
 ██║░░░░░███████╗╚██████╔╝███████╗██║░╚███║░░░██║░░░  ██║░░░░░███████╗╚██████╔╝██████╔╝
 ╚═╝░░░░░╚══════╝░╚═════╝░╚══════╝╚═╝░░╚══╝░░░╚═╝░░░  ╚═╝░░░░░╚══════╝░╚═════╝░╚═════╝░
 
-Fluent Plus ${version}
-https://fluent-pl.us
+                                fluent-pl.us ${version}
+                    source code here: github.com/discoart/fluentplus
 ]]--`;
 
 const KEYWORDS = new Set([
