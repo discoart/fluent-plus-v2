@@ -9,6 +9,8 @@ const seen = new Set();
 const chunks = [];
 const entryPath = path.resolve(entry);
 
+const channel = version.includes('beta') ? 'beta' : 'stable';
+
 const BANNER = `--[[
 ███████╗██╗░░░░░██╗░░░██╗███████╗███╗░░██╗████████╗  ██████╗░██╗░░░░░██╗░░░██╗░██████╗
 ██╔════╝██║░░░░░██║░░░██║██╔════╝████╗░██║╚══██╔══╝  ██╔══██╗██║░░░░░██║░░░██║██╔════╝
@@ -17,7 +19,7 @@ const BANNER = `--[[
 ██║░░░░░███████╗╚██████╔╝███████╗██║░╚███║░░░██║░░░  ██║░░░░░███████╗╚██████╔╝██████╔╝
 ╚═╝░░░░░╚══════╝░╚═════╝░╚══════╝╚═╝░░╚══╝░░░╚═╝░░░  ╚═╝░░░░░╚══════╝░╚═════╝░╚═════╝░
 
-                                fluent-pl.us ${version}
+                                ${version} [${channel}]
                     source code here: github.com/discoart/fluentplus
 ]]--`;
 
