@@ -23,6 +23,7 @@ jobs:
         id: vars
         run: |
           TAG="${{ github.ref_name }}"
+          VER=v$(cat VERSION)
           if echo "$TAG" | grep -qi beta; then
             echo "channel=beta" >> $GITHUB_OUTPUT
             echo "fname=beta.lua" >> $GITHUB_OUTPUT
@@ -30,6 +31,7 @@ jobs:
             echo "channel=stable" >> $GITHUB_OUTPUT
             echo "fname=stable.lua" >> $GITHUB_OUTPUT
           fi
+          echo "version=$VER" >> $GITHUB_OUTPUT
 
       - name: Run
         run: |
@@ -39,4 +41,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/${{ steps.vars.outputs.fname }}
-          name: ${{ steps.vars.outputs.channel }} ${{ github.ref_name }}
+          name: ${{ steps.vars.outputs.channel }} ${{ steps.vars.outputs.version }}

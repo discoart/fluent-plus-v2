@@ -3,7 +3,10 @@ const path = require('path');
 
 const entry = process.argv[2];
 const output = process.argv[3];
-const version = process.argv[4] || 'dev';
+let version = process.argv[4] || 'dev';
+if (!/^v?\d+\.\d+\.\d+/.test(version) && fs.existsSync('VERSION')) {
+  version = 'v' + fs.readFileSync('VERSION', 'utf-8').trim();
+}
 
 const seen = new Set();
 const chunks = [];
