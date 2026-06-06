@@ -54,21 +54,40 @@ function collectLocals(code) {
       extract(m).forEach(n => { if (n) allMatches.push({ name: n, pos: m.index }); });
     }
   }
-  scan(/local\s+(?:function\s+)?\b([a-zA-Z_]\w*)\b/g, m => [m[1]]);
-  scan(/local\s+([a-zA-Z_]\w*\b(?:\s*,\s*[a-zA-Z_]\w*\b)*)\s*[=:=]/g, m => m[1].split(',').map(p => p.trim()));
-  scan(/local\s+([a-zA-Z_]\w*\b(?:\s*,\s*[a-zA-Z_]\w*\b)+)(?!\s*[=:=])/g, m => m[1].split(',').map(p => p.trim()));
+  scan(/local\s+(?:function\s+)?\b([a-zA-Z_]\w*)/g, m => [m[1]]);
+  scan(/local\s+([a-zA-Z_]\w*(?:\s*,\s*[a-zA-Z_]\w*)*)\s*[=:=]/g, m => m[1].split(',').map(p => p.trim()));
+  scan(/local\s+([a-zA-Z_]\w*(?:\s*,\s*[a-zA-Z_]\w*)+)(?!\s*[=:=])/g, m => m[1].split(',').map(p => p.trim()));
+  scan(/function\s*(?:\w+\s*)?\(([^)]*)\)/g, m => m[1].split(',').map(p => p.trim()).filter(t => t !== 'self'));
+  scan(/for\s+([a-zA-Z_]\w*)\s*=/g, m => [m[1]]);
+  scan(/for\s+([a-zA-Z_]\w*)(?:\s*,\s*([a-zA-Z_]\w*))?\s+in/g, m => [m[1], m[2]].filter(Boolean));
   allMatches.sort((a, b) => a.pos - b.pos);
+  const entryChunk = chunks[chunks.length - 1] || '';
+  if (entryChunk) {
+    const entryLocals = [];
+    const entrySeen = new Set();
+    function eAdd(name) {
+      if (!/^[a-zA-Z_]\w*$/.test(name)) return;
+      if (KEYWORDS.has(name)) return;
+      if (name === 'self' || name === '_') return;
+      if (!entrySeen.has(name)) { entrySeen.add(name); entryLocals.push(name); }
+    }
+    const e1 = /local\s+(?:function\s+)?\b([a-zA-Z_]\w*)/g;
+    let m;
+    while ((m = e1.exec(entryChunk))) eAdd(m[1]);
+    const e2 = /local\s+([a-zA-Z_]\w*(?:\s*,\s*[a-zA-Z_]\w*)*)\s*[=:=]/g;
+    while ((m = e2.exec(entryChunk))) m[1].split(',').forEach(p => eAdd(p.trim()));
+    const e3 = /function\s*(?:\w+\s*)?\(([^)]*)\)/g;
+    while ((m = e3.exec(entryChunk))) m[1].split(',').forEach(p => { const t = p.trim(); if (t && t !== 'self') eAdd(t); });
+    entryLocals.forEach(n => add(n));
+  }
   allMatches.forEach(({ name }) => add(name));
-
   return names;
 }
 
 function buildRenameMap(names) {
   const map = {};
-  const skip = new Set(['Fluent', 'SaveManager', 'InterfaceManager', 'Mobile']);
   let idx = 0;
   for (const name of names) {
-    if (skip.has(name)) continue;
     let sn;
     do { sn = shortName(idx++); } while (KEYWORDS.has(sn));
     map[name] = sn;
@@ -133,7 +152,7 @@ function obfuscateStrings(code) {
     const chars = [];
     for (let i = 0; i < content.length; i++) chars.push(content.charCodeAt(i));
     if (chars.length <= 60) return 'string.char(' + chars.join(',') + ')';
-    return '(function()local _r=""for _,v in ipairs{' + chars.join(',') + '}do _r=_r..string.char(v)end;return _r end)()';
+    return '(function()local s=""for _,v in ipairs{' + chars.join(',') + '}do s=s..string.char(v)end;return s end)()';
   });
 }
 
@@ -173,3 +192,5 @@ fs.mkdirSync(path.dirname(path.resolve(output)), { recursive: true });
 fs.writeFileSync(path.resolve(output), combined);
 const size = (Buffer.byteLength(combined, 'utf-8') / 1024).toFixed(1);
 console.log('Bundled to', output, `(${size} KB)`);
+
+console.log("ENTRY:",JSON.stringify(chunks[chunks.length-1].slice(0,200)));
