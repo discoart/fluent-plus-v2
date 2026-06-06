@@ -1,4 +1,4 @@
-local Creator = require("creator")
+﻿local Creator = require("creator")
 local Library = require("library")
 local Flipper = require("flipper")
 local resolveFont = Creator.resolveFont
@@ -9,11 +9,6 @@ local TweenService = game:GetService("TweenService")
 local Camera = workspace.CurrentCamera
 
 local Mobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, UserInputService:GetPlatform()) ~= nil or UserInputService.TouchEnabled
-
-local fischbypass
-if game.GameId == 5750914919 then
-	fischbypass = true
-end
 
 local Components = {
 	Assets = {
@@ -273,7 +268,6 @@ Components.Element = (function()
 		Element:SetTitle(Title or "")
 		Element:SetDesc(Desc)
 
-
 		if Library.Window and Library.Window.RegisterElement then
 			Library.Window.RegisterElement(Element.Frame, Title, "Element", Desc)
 		elseif Library.Windows and #Library.Windows > 0 then
@@ -383,7 +377,6 @@ Components.Section = (function()
 			Section.Container.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y)
 			Section.Root.Size = UDim2.new(1, 0, 0, Section.Layout.AbsoluteContentSize.Y + 25)
 		end)
-
 
 		if Library.Window and Library.Window.RegisterElement then
 			Library.Window.RegisterElement(Section.Root, Title, "Section")
@@ -917,14 +910,12 @@ Components.Tab = (function()
 			Type = "Tab",
 		}
 
-		if not fischbypass then 
-			if Library:GetIcon(Icon) then
-				Icon = Library:GetIcon(Icon)
-			end
+		if Library:GetIcon(Icon) then
+			Icon = Library:GetIcon(Icon)
+		end
 
-			if Icon == "" or Icon == nil then
-				Icon = nil
-			end
+		if Icon == "" or Icon == nil then
+			Icon = nil
 		end
 
 		Tab.TitleLabel = New("TextLabel", {
@@ -946,8 +937,8 @@ Components.Tab = (function()
 
 		Tab.TitleHolder = New("Frame", {
 			AnchorPoint = Vector2.new(0, 0.5),
-			Position = not fischbypass and Icon and UDim2.new(0, 30, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
-			Size = not fischbypass and Icon and UDim2.new(1, -42, 1, 0) or UDim2.new(1, -24, 1, 0),
+			Position = Icon and UDim2.new(0, 30, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
+			Size = Icon and UDim2.new(1, -42, 1, 0) or UDim2.new(1, -24, 1, 0),
 			BackgroundTransparency = 1,
 			ClipsDescendants = true,
 			ZIndex = 11,
@@ -983,7 +974,6 @@ Components.Tab = (function()
 				},
 			}),
 		})
-
 
 		local ContainerLayout = New("UIListLayout", {
 			Padding = UDim.new(0, 5),
@@ -1161,16 +1151,14 @@ Components.Tab = (function()
 			end
 
 		local SubTabIcon = Icon
-			if not fischbypass then 
-				local resolvedIcon = Library:GetIcon(Icon)
-				if resolvedIcon then
-					SubTabIcon = resolvedIcon
-				end
+		local resolvedIcon = Library:GetIcon(Icon)
+		if resolvedIcon then
+			SubTabIcon = resolvedIcon
+		end
 
-			if SubTabIcon == "" or SubTabIcon == nil then
-				SubTabIcon = nil
-			end
-			end
+		if SubTabIcon == "" or SubTabIcon == nil then
+			SubTabIcon = nil
+		end
 
 			local SubTabButton = New("TextButton", {
 				Size = UDim2.new(0, 0, 0, 32),
@@ -1355,14 +1343,12 @@ Components.Tab = (function()
 				local Section = { Type = "Section", Parent = SubTab }
 
 				local Icon = SectionIcon
-				if not fischbypass then 
-					if Library:GetIcon(Icon) then
-						Icon = Library:GetIcon(Icon)
-					end
+				if Library:GetIcon(Icon) then
+					Icon = Library:GetIcon(Icon)
+				end
 
-			if Icon == "" or Icon == nil then
-				Icon = nil
-					end
+				if Icon == "" or Icon == nil then
+					Icon = nil
 				end
 
 				local SectionFrame = Components.Section(SectionTitle, SubTab.Container, Icon)
@@ -1504,15 +1490,13 @@ Components.Tab = (function()
 			local Section = { Type = "Section", Parent = self }
 
 			local Icon = SectionIcon
-			if not fischbypass then 
-				local resolvedIcon = Library:GetIcon(Icon)
-				if resolvedIcon then
-					Icon = resolvedIcon
-				end
+			local resolvedIcon = Library:GetIcon(Icon)
+			if resolvedIcon then
+				Icon = resolvedIcon
+			end
 
-				if Icon == "" or Icon == nil then
-					Icon = nil
-				end
+			if Icon == "" or Icon == nil then
+				Icon = nil
 			end
 
 			local SectionFrame = Components.Section(SectionTitle, Tab.Container, Icon)
@@ -3082,7 +3066,6 @@ Components.Window = (function()
 			CenterWindow()
 		end)
 
-
 		Window.TitleBar = Components.TitleBar({
 			Title = Config.Title,
 			SubTitle = Config.SubTitle,
@@ -3826,7 +3809,6 @@ Components.Window = (function()
 				Window.SelectorPosMotor:setGoal(Instant(TabModule:GetCurrentTabPos()))
 			end)
 		end
-
 
 		return Window
 	end

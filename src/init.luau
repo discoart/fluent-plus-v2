@@ -1,4 +1,4 @@
---[[
+﻿--[[
 
 ███████╗██╗░░░░░██╗░░░██╗███████╗███╗░░██╗████████╗  ██████╗░██╗░░░░░██╗░░░██╗░██████╗
 ██╔════╝██║░░░░░██║░░░██║██╔════╝████╗░██║╚══██╔══╝  ██╔══██╗██║░░░░░██║░░░██║██╔════╝
@@ -23,7 +23,6 @@ local Mouse = LocalPlayer:GetMouse()
 local httpService = game:GetService("HttpService")
 
 local Mobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, UserInputService:GetPlatform()) ~= nil or UserInputService.TouchEnabled
-
 
 local RenderStepped = RunService.RenderStepped
 local ProtectGui = protectgui or (syn and syn.protect_gui) or function() end
@@ -111,375 +110,224 @@ function Library:Round(Number, Factor)
 	return Number:find("%.") and tonumber(Number:sub(1, Number:find("%.") + Factor)) or Number
 end
 
-
 local NotificationModule = Components.Notification
 NotificationModule:Init(GUI)
 
 local New = Creator.New
 
-
-
-
-
-
-
-
 function Library:CreateMinimizer(Config)
-
 
 	Config = Config or {}
 
-
 	if self.Minimizer and self.Minimizer.Parent then
-
 
 		return self.Minimizer
 
-
 	end
-
-
-
-
 
 	local parentGui = Library.GUI or GUI
 
-
 	if parentGui then parentGui.DisplayOrder = 1000 end
-
 
 	local isMobile = Mobile and true or false
 
-
-
-
-
 	local iconAsset = Library:GetIcon("moon")
-
 
 	if type(Config.Icon) == "string" and Config.Icon ~= "" then
 
-
 		pcall(function()
-
 
 			local resolved = Library:GetIcon(Config.Icon)
 
-
 			if resolved and resolved ~= "" then
-
 
 				iconAsset = resolved
 
-
 			elseif string.match(Config.Icon, "^rbxassetid://%d+$") then
-
 
 				iconAsset = Config.Icon
 
-
 			end
-
 
 		end)
 
-
 	end
-
-
-
-
 
 	local useAcrylic = (Config.Acrylic == true)
 
-
-
-
-
 	local cornerRadius = tonumber(Config.Corner)
-
 
 	local backgroundTransparency = (typeof(Config.Transparency) == "number") and math.clamp(Config.Transparency, 0, 1) or 0
 
-
 	local draggableWhole = (Config.Draggable == true)
-
-
-
-
 
 	local holder
 
-
 	local function createButton(isDesktop)
-
 
 		return New("TextButton", {
 
-
 			Name = "MinimizeButton",
-
 
 			Size = UDim2.new(1, 0, 1, 0),
 
-
 			BorderSizePixel = 0,
-
 
 			BackgroundTransparency = backgroundTransparency or 0,
 
-
 			AutoButtonColor = true,
-
 
 			ThemeTag = {
 
-
 				BackgroundColor3 = "Element",
-
 
 			},
 
-
 		}, {
-
 
 			New("UICorner", { CornerRadius = UDim.new(0, cornerRadius or (isDesktop and 14 or 12)) }),
 
-
 			New("UIStroke", {
-
 
 				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 
-
 				Transparency = isDesktop and 0.6 or 0.7,
-
 
 				Thickness = isDesktop and 2 or 1.5,
 
-
 				ThemeTag = {
-
 
 					Color = "ElementBorder",
 
-
 				},
 
-
 			}),
-
 
 			New("ImageLabel", {
 
-
 				Name = "Icon",
-
 
 				Image = iconAsset,
 
-
 				Size = UDim2.new(0.8, 0, 0.8, 0),
-
 
 				Position = UDim2.new(0.5, 0, 0.5, 0),
 
-
 				AnchorPoint = Vector2.new(0.5, 0.5),
-
 
 				BackgroundTransparency = 1,
 
-
 				ThemeTag = {
-
 
 					ImageColor3 = "Text",
 
-
 				},
-
 
 			}, {
 
-
 				New("UIAspectRatioConstraint", { AspectRatio = 1, AspectType = Enum.AspectType.FitWithinMaxSize }),
-
 
 				New("UICorner", { CornerRadius = UDim.new(0, 0) })
 
-
 			}),
-
-
-
-
 
 		})
 
-
 	end
-
-
-
-
 
 	if isMobile then
 
-
 		holder = New("Frame", {
-
 
 			Name = "FluentMinimizer",
 
-
 			Parent = parentGui,
 
-
 			Size = Config.Size or UDim2.fromOffset(36, 36),
-
 
 			Position = Config.Position or UDim2.new(0.45, 0, 0.025, 0),
 
-
 			BackgroundTransparency = 1,
-
 
 			ZIndex = 999999999,
 
-
 			Visible = (Config.Visible ~= false),
 
-
 		})
-
 
 	else
 
-
 		holder = New("Frame", {
-
 
 			Name = "FluentMinimizer",
 
-
 			Parent = parentGui,
-
 
 			Size = Config.Size or UDim2.fromOffset(36, 36),
 
-
 			Position = Config.Position or UDim2.new(0, 300, 0, 20),
-
 
 			BackgroundTransparency = 1,
 
-
 			ZIndex = 999999999,
-
 
 			Visible = (Config.Visible ~= false),
 
-
 		})
 
-
 	end
-
-
-
-
 
 	if useAcrylic then
 
-
 		local miniAcrylic = Acrylic.AcrylicPaint()
-
 
 		miniAcrylic.Frame.Parent = holder
 
-
 		miniAcrylic.Frame.Size = UDim2.fromScale(1, 1)
-
 
 		pcall(function() miniAcrylic.AddParent(holder) end)
 
-
-
-
-
 		local desiredCorner = UDim.new(0, cornerRadius or 0)
-
 
 		pcall(function()
 
-
 			for _, descendant in ipairs(miniAcrylic.Frame:GetDescendants()) do
-
 
 				if descendant.ClassName == "UICorner" then
 
-
 					descendant.CornerRadius = desiredCorner
-
 
 				elseif descendant.ClassName == "ImageLabel" then
 
-
 					descendant.Size = UDim2.fromScale(1, 1)
-
 
 					descendant.Position = UDim2.new(0.5, 0, 0.5, 0)
 
-
 					descendant.AnchorPoint = Vector2.new(0.5, 0.5)
-
 
 				end
 
-
 			end
-
 
 		end)
 
-
 		self.MinimizerAcrylic = miniAcrylic
-
 
 	end
 
-
-
-
-
 	local btnInstance = createButton(not isMobile)
-
 
 	btnInstance.Parent = holder
 
-
 	btnInstance.ZIndex = (holder.ZIndex or 0) + 1
-
-
-
-
 
 	local button = holder:FindFirstChildOfClass("TextButton")
 
-
 	if button then
-
 
 		local isDragging = false
 
-
 		local dragStart, dragOffset
-
-
-
-
 
 		if draggableWhole then
 			local dragMoveConn, dragEndConn
@@ -525,45 +373,23 @@ function Library:CreateMinimizer(Config)
 		end
 		Creator.AddSignal(button.MouseButton1Click, function()
 
-
 			task.wait(0.1)
-
 
 			if not isDragging and Library.Window then
 
-
 				Library.Window:Minimize()
-
 
 			end
 
-
 		end)
-
 
 	end
 
-
-
-
-
-
-
-
-
-
-
 	self.Minimizer = holder
-
 
 	return holder
 
-
 end
-
-
-
-
 
 function Library:SetTheme(Value)
 	if Library.Window and table.find(Library.Themes, Value) then
@@ -574,30 +400,19 @@ function Library:SetTheme(Value)
 	end
 end
 
-
-
-
-
 function Library:Destroy()
-
 
 	if Library.Window then
 
-
 		Library.Unloaded = true
-
 
 		if Library.UseAcrylic then
 
-
 			Library.Window.AcrylicPaint.Model:Destroy()
-
 
 		end
 
-
 		Creator.Disconnect()
-
 
 		for i = #Library.Windows, 1, -1 do
 			local window = Library.Windows[i]
@@ -722,15 +537,9 @@ function Library:SetWindowTransparency(Value)
 	end
 end
 
-
-
-
-
 function Library:Notify(Config)
 
-
 	return NotificationModule:New(Config)
-
 
 end
 
@@ -738,589 +547,375 @@ function Library:DisableMetrics()
 	Library.MetricsEnabled = false
 end
 
-
-
-
-
 Fluent = Library
 
 if Library.ExposeGlobals and getgenv then
 	getgenv().Fluent = Library
 end
 
-
 local MinimizeButton = New("TextButton", {
-
 
 	BackgroundColor3 = Color3.fromRGB(25, 25, 30),
 
-
 	Size = UDim2.new(1, 0, 1, 0),
 
-
 	BorderSizePixel = 0,
-
 
 	BackgroundTransparency = 0.05, 
 
-
 }, {
 
-
 	New("UICorner", {
-
 
 		CornerRadius = UDim.new(0, 14),
 
-
 	}),
-
 
 	New("UIGradient", {
 
-
 		Color = ColorSequence.new{
-
 
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 50)),
 
-
 			ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 25))
-
 
 		},
 
-
 		Rotation = 45,
-
 
 	}),
 
-
 	New("UIStroke", {
-
 
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 
-
 		Color = Color3.fromRGB(100, 150, 255),
-
 
 		Transparency = 0.6,
 
-
 		Thickness = 2,
-
 
 	}),
 
-
 	New("Frame", {
 
-
 		BackgroundColor3 = Color3.fromRGB(100, 150, 255),
-
 
 		BackgroundTransparency = 0.9,
 
-
 		Size = UDim2.new(1, -6, 1, -6),
-
 
 		Position = UDim2.new(0, 3, 0, 3),
 
-
 		BorderSizePixel = 0,
-
 
 	}, {
 
-
 		New("UICorner", {
-
 
 			CornerRadius = UDim.new(0, 11),
 
-
 		}),
-
 
 	}),
 
-
 	New("Frame", {
-
 
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 
-
 		BackgroundTransparency = 0.94,
-
 
 		Size = UDim2.new(0.7, 0, 0.3, 0),
 
-
 		Position = UDim2.new(0.15, 0, 0.1, 0),
-
 
 		BorderSizePixel = 0,
 
-
 	}, {
 
-
 		New("UICorner", {
-
 
 			CornerRadius = UDim.new(0, 8),
 
-
 		}),
-
 
 	}),
 
-
 	New("ImageLabel", {
-
 
 		Image = Library:GetIcon("moon"),
 
-
 		Size = UDim2.new(0.8, 0, 0.8, 0),
-
 
 		Position = UDim2.new(0.5, 0, 0.5, 0),
 
-
 		AnchorPoint = Vector2.new(0.5, 0.5),
-
 
 		BackgroundTransparency = 1,
 
-
 		ImageColor3 = Color3.fromRGB(255, 255, 255),
-
 
 		ImageTransparency = 0.1,
 
-
 	}, {
-
 
 		New("UIAspectRatioConstraint", {
 
-
 			AspectRatio = 1,
-
 
 			AspectType = Enum.AspectType.FitWithinMaxSize,
 
-
 		})
-
 
 	})
 
-
 })
-
-
-
-
 
 local MobileMinimizeButton = New("TextButton", {
 
-
 	BackgroundColor3 = Color3.fromRGB(25, 25, 30),
-
 
 	Size = UDim2.new(1, 0, 1, 0),
 
-
 	BorderSizePixel = 0,
-
 
 	BackgroundTransparency = 0.05,
 
-
 }, {
-
 
 	New("UICorner", {
 
-
 		CornerRadius = UDim.new(0, 12),
 
-
 	}),
-
 
 	New("UIGradient", {
 
-
 		Color = ColorSequence.new{
-
 
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 50)),
 
-
 			ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 25))
-
 
 		},
 
-
 		Rotation = 45,
 
-
 	}),
-
 
 	New("UIStroke", {
 
-
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-
 
 		Color = Color3.fromRGB(100, 150, 255),
 
-
 		Transparency = 0.7,
-
 
 		Thickness = 1.5,
 
-
 	}),
-
 
 	New("Frame", {
 
-
 		BackgroundColor3 = Color3.fromRGB(100, 150, 255),
-
 
 		BackgroundTransparency = 0.92,
 
-
 		Size = UDim2.new(1, -4, 1, -4),
-
 
 		Position = UDim2.new(0, 2, 0, 2),
 
-
 		BorderSizePixel = 0,
 
-
 	}, {
-
 
 		New("UICorner", {
 
-
 			CornerRadius = UDim.new(0, 10),
-
 
 		}),
 
-
 	}),
-
 
 	New("ImageLabel", {
 
-
 		Image = Library:GetIcon("moon"),
-
 
 		Size = UDim2.new(0.8, 0, 0.8, 0),
 
-
 		Position = UDim2.new(0.5, 0, 0.5, 0),
-
 
 		AnchorPoint = Vector2.new(0.5, 0.5),
 
-
 		BackgroundTransparency = 1,
-
 
 		ImageColor3 = Color3.fromRGB(255, 255, 255),
 
-
 		ImageTransparency = 0.1,
-
 
 	}, {
 
-
 		New("UIAspectRatioConstraint", {
-
 
 			AspectRatio = 1,
 
-
 			AspectType = Enum.AspectType.FitWithinMaxSize,
-
 
 		})
 
-
 	})
-
 
 })
 
-
-
-
-
 local Minimizer = nil
-
-
-
-
 
 local isDragging = false
 
-
 local dragStart = nil
-
 
 local dragOffset = nil
 
-
 local activeDragInput = nil
-
-
-
-
 
 Creator.AddSignal(MinimizeButton.InputBegan, function(Input)
 
-
 	if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-
 
 		isDragging = true
 
-
 		dragStart = Vector2.new(Input.Position.X, Input.Position.Y)
-
 
 		dragOffset = (Library.Minimizer or Minimizer).Position
 
-
 		activeDragInput = Input
-
 
 		local connection
 
-
 		connection = Input.Changed:Connect(function()
-
 
 			if Input.UserInputState == Enum.UserInputState.End then
 
-
 				isDragging = false
-
 
 				dragStart = nil
 
-
 				dragOffset = nil
-
 
 				activeDragInput = nil
 
-
 				connection:Disconnect()
-
 
 			end
 
-
 		end)
-
 
 	end
 
-
 end)
-
-
-
-
 
 Creator.AddSignal(MobileMinimizeButton.InputBegan, function(Input)
 
-
 	if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-
 
 		isDragging = true
 
-
 		dragStart = Vector2.new(Input.Position.X, Input.Position.Y)
-
 
 		dragOffset = (Library.Minimizer or Minimizer).Position
 
-
 		activeDragInput = Input
-
 
 		local connection
 
-
 		connection = Input.Changed:Connect(function()
-
 
 			if Input.UserInputState == Enum.UserInputState.End then
 
-
 				isDragging = false
-
 
 				dragStart = nil
 
-
 				dragOffset = nil
-
 
 				activeDragInput = nil
 
-
 				connection:Disconnect()
-
 
 			end
 
-
 		end)
-
 
 	end
 
-
 end)
-
-
-
-
 
 local debugCount = 0
 
-
 Creator.AddSignal(RunService.Heartbeat, function()
-
 
 	local activeMin = Library.Minimizer or Minimizer
 
-
 	if isDragging and dragStart and dragOffset and activeMin and activeMin.Parent and activeDragInput then
-
 
 		debugCount = debugCount + 1
 
-
 		local currentMousePos = Vector2.new(activeDragInput.Position.X, activeDragInput.Position.Y)
-
 
 		local delta = currentMousePos - dragStart
 
-
 		local newX = dragOffset.X.Offset + delta.X
-
 
 		local newY = dragOffset.Y.Offset + delta.Y
 
-
 		local viewportSize = workspace.Camera.ViewportSize
-
 
 		local minimizerSize = activeMin.AbsoluteSize
 
-
-
-
-
 		if newX < 0 then newX = 0 end
-
 
 		if newY < 0 then newY = 0 end
 
-
 		if newX > viewportSize.X - minimizerSize.X then 
-
 
 			newX = viewportSize.X - minimizerSize.X 
 
-
 		end
-
 
 		if newY > viewportSize.Y - minimizerSize.Y then 
 
-
 			newY = viewportSize.Y - minimizerSize.Y 
-
 
 		end
 
-
 		activeMin.Position = UDim2.new(0, newX, 0, newY)
-
 
 	end
 
-
 end)
-
-
-
-
 
 Creator.AddSignal(MinimizeButton.MouseButton1Click, function()
 
-
 	task.wait(0.1)
-
 
 	if not isDragging then
 
-
 		Library.Window:Minimize()
-
 
 	end
 
-
 end)
-
-
-
-
 
 Creator.AddSignal(MobileMinimizeButton.MouseButton1Click, function()
 
-
 	task.wait(0.1)
-
 
 	if not isDragging then
 
-
 		Library.Window:Minimize()
-
 
 	end
 
-
 end)
-
 
 local Fluent = Library
 if Library.ExposeGlobals then

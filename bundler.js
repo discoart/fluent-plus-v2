@@ -7,6 +7,7 @@ const version = process.argv[4] || 'dev';
 
 const seen = new Set();
 const chunks = [];
+const entryPath = path.resolve(entry);
 
 const BANNER = `--[[
 ███████╗██╗░░░░░██╗░░░██╗███████╗███╗░░██╗████████╗  ██████╗░██╗░░░░░██╗░░░██╗░██████╗
@@ -94,17 +95,37 @@ function resolveModule(name, fromDir) {
   return null;
 }
 
-function bundle(filePath) {
+function processModule(filePath, modName) {
   const absPath = path.resolve(filePath);
   if (seen.has(absPath)) return;
   seen.add(absPath);
+
   let content = fs.readFileSync(absPath, 'utf-8');
   const dir = path.dirname(absPath);
+
   content = content.replace(/require\(["']([^"']+)["']\)/g, (match, mod) => {
     const resolved = resolveModule(mod, dir);
-    if (resolved) bundle(resolved);
-    return '';
+    if (resolved) {
+      processModule(resolved, mod);
+      return '_G.__modules["' + mod + '"]';
+    }
+    return 'nil';
   });
+
+  if (absPath === entryPath) {
+    chunks.push(content);
+    return;
+  }
+
+  content = content.replace(/\n\s*return\s+([^\n]+)\s*$/, (match, retLine) => {
+    const vals = retLine.split(',').map(v => v.trim());
+    if (vals.length <= 1) {
+      return '\n_G.__modules["' + modName + '"] = ' + (vals[0] || 'nil');
+    }
+    return '\n' + vals.map((v, i) => '_G.__modules["' + modName + '_' + i + '"] = ' + v).join('\n');
+  });
+
+  content = 'do -- ' + modName + '\n' + content + '\nend';
   chunks.push(content);
 }
 
@@ -124,17 +145,30 @@ function minify(code) {
   code = code.replace(/--[^\r\n]*/g, '');
   const map = buildRenameMap(collectLocals(code));
   code = renameVars(code, map);
-  code = obfuscateStrings(code);
   code = code.replace(/\r\n/g, '\n');
   code = code.replace(/[ \t]+/g, ' ');
   code = code.replace(/\n+/g, '\n');
   code = code.replace(/\n/g, ' ');
   code = code.replace(/ +/g, ' ');
+  const _modRefs = [];
+  code = code.replace(/_G\.__modules\["([^"]+)"\]/g, (m) => { _modRefs.push(m); return '___M' + (_modRefs.length - 1) + '___'; });
+  code = obfuscateStrings(code);
+  code = code.replace(/___M(\d+)___/g, (_, n) => _modRefs[+n]);
   return code.trim();
 }
 
-bundle(path.resolve(entry));
-let combined = chunks.join('\n');
+processModule(entryPath, '__entry');
+let combined = '_G.__modules = _G.__modules or {}\n' + chunks.join('\n');
+
+combined = combined.replace(
+  /local\s+(\w+(?:\s*,\s*\w+)*)\s*=\s*_G\.__modules\["(\w+)"\]/g,
+  (match, vars, modName) => {
+    const varNames = vars.split(',').map(v => v.trim());
+    if (varNames.length <= 1) return match;
+    return varNames.map((v, i) => 'local ' + v + ' = _G.__modules["' + modName + '_' + i + '"]').join('\n');
+  }
+);
+
 combined = minify(combined);
 combined = BANNER + '\n\n' + combined;
 

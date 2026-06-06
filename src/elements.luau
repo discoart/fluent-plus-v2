@@ -1,4 +1,4 @@
-local Creator = require("creator")
+﻿local Creator = require("creator")
 local Library = require("library")
 local Flipper = require("flipper")
 
@@ -11,11 +11,6 @@ local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
 local LocalPlayer = game:GetService("Players").LocalPlayer
 
 local Mobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, UserInputService:GetPlatform()) ~= nil or UserInputService.TouchEnabled
-
-local fischbypass
-if game.GameId == 5750914919 then
-	fischbypass = true
-end
 
 local New = Creator.New
 local Components = require("components")
@@ -476,7 +471,6 @@ ElementsTable.Dropdown = (function()
 
 -- Helper functions moved up above filtering logic
 
-
 		local DropdownHolderFrame = New("Frame", {
 			Size = UDim2.fromScale(1, 1),
             ZIndex = DROPDOWN_Z_INDEX + 1,
@@ -903,10 +897,10 @@ ElementsTable.Slider = (function()
 
 	function Element:New(Idx, Config)
 		assert(Config.Title, "Slider - Missing Title.")
-		assert(Config.Default, "Slider - Missing default value.")
-		assert(Config.Min, "Slider - Missing minimum value.")
-		assert(Config.Max, "Slider - Missing maximum value.")
-		assert(Config.Rounding, "Slider - Missing rounding value.")
+		assert(Config.Default ~= nil, "Slider - Missing default value.")
+		assert(Config.Min ~= nil, "Slider - Missing minimum value.")
+		assert(Config.Max ~= nil, "Slider - Missing maximum value.")
+		assert(Config.Rounding ~= nil, "Slider - Missing rounding value.")
 
 		local Slider = {
 			Value = nil,
@@ -1391,7 +1385,7 @@ ElementsTable.Keybind = (function()
 		end
 
 		function Keybind:SetValue(Key, Mode)
-			Key = Key or Keybind.Key
+			Key = Key or Keybind.Value
 			Mode = Mode or Keybind.Mode
 
 			KeybindDisplayLabel.Text = Key

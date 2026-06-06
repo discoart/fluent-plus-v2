@@ -163,8 +163,10 @@ function Library:GetCustomAsset(Value)
 		return Value
 	end
 
-	local SafeName = Value:gsub("https?://", ""):gsub("[^%w%-_%.]", "_")
-	local ext = Value:match("%.(%w+)%?") or Value:match("%.(%w+)$") or "png"
+	local SafeName = Value:match("/([^/]+)%??$") or Value
+	SafeName = SafeName:gsub("[^%w%-_%.]", "_"):gsub("%.%.", "."):gsub("^%.", ""):gsub("%.$", "")
+	local ext = SafeName:match("%.(%w+)$") or "png"
+	SafeName = SafeName:gsub("%..-$", "")
 	local FileName = SafeName .. "." .. ext
 
 	local hasFile = false

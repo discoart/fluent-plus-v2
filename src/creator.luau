@@ -1,4 +1,4 @@
-local Flipper = require("flipper")
+﻿local Flipper = require("flipper")
 local Library = require("library")
 local Themes = require("themes")
 
@@ -177,8 +177,6 @@ function Creator.OverrideTag(Object, Properties)
 		Creator.UpdateTheme()
 	end
 end
-
-
 
 local MiniMessageColors = {
 	["black"] = "#000000",

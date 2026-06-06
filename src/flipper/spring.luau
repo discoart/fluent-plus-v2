@@ -1,4 +1,4 @@
-local VELOCITY_THRESHOLD = 0.001
+﻿local VELOCITY_THRESHOLD = 0.001
 local POSITION_THRESHOLD = 0.001
 
 local EPS = 0.0001
@@ -18,7 +18,6 @@ function Spring.new(targetValue, options)
 end
 
 function Spring:step(state, dt)
-
 
 	local d = self._dampingRatio
 	local f = self._frequency * 2 * math.pi
@@ -40,8 +39,6 @@ function Spring:step(state, dt)
 		local i = math.cos(f * c * dt)
 		local j = math.sin(f * c * dt)
 
-
-
 		local z
 		if c > EPS then
 			z = j / c
@@ -49,8 +46,6 @@ function Spring:step(state, dt)
 			local a = dt * f
 			z = a + ((a * a) * (c * c) * (c * c) / 20 - c * c) * (a * a * a) / 6
 		end
-
-
 
 		local y
 		if f * c > EPS then
