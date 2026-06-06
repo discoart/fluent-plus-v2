@@ -39,3 +39,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/${{ steps.vars.outputs.fname }}
+          name: ${{ steps.vars.outputs.channel }} ${{ github.ref_name }}
