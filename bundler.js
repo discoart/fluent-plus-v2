@@ -21,7 +21,7 @@ const BANNER = `--[[
 ██║░░░░░███████╗╚██████╔╝███████╗██║░╚███║░░░██║░░░  ██║░░░░░███████╗╚██████╔╝██████╔╝
 ╚═╝░░░░░╚══════╝░╚═════╝░╚══════╝╚═╝░░╚══╝░░░╚═╝░░░  ╚═╝░░░░░╚══════╝░╚═════╝░╚═════╝░
 
-                                ${displayVer} [${channel}]
+                                fluent-pl.us ${displayVer} [${channel}]
                     source code here: github.com/discoart/fluentplus
 ]]--`;
 
