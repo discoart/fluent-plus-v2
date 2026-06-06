@@ -5,8 +5,8 @@ local RunService = game:GetService("RunService")
 
 local Elements = {}
 Elements.__index = Elements
-Elements.__namecall = function(Table, Key, ...)
-	return Elements[Key](...)
+Elements.__namecall = function(self, Key, ...)
+	return Elements[Key](self, ...)
 end
 
 for _, ElementComponent in pairs(ElementsTable) do

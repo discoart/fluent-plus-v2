@@ -1,3 +1,5 @@
+local Library = require("library")
+
 local function clamp01(value)
 	return math.clamp(value or 0, 0, 1)
 end
@@ -31,3 +33,7 @@ end
 function Library:GetWindowBackdropSnapshot()
 	local snapshot = {
 		backgroundTransparency = 0.5,
+		window = nil,
+	}
+	return snapshot
+end

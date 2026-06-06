@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local Acrylic = require("acrylic")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
 return function(Components)
 	local Spring = Flipper.Spring.new

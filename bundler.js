@@ -51,6 +51,7 @@ function collectLocals(code) {
     if (!/^[a-zA-Z_]\w*$/.test(name)) return;
     if (KEYWORDS.has(name)) return;
     if (name === 'self' || name === '_') return;
+    if (/^[a-z]$/i.test(name) && name.length === 1) return;
     if (!seen.has(name)) { seen.add(name); names.push(name); }
   }
   const allMatches = [];
@@ -62,8 +63,8 @@ function collectLocals(code) {
     }
   }
   scan(/local\s+(?:function\s+)?\b([a-zA-Z_]\w*)\b/g, m => [m[1]]);
-  scan(/local\s+([a-zA-Z_]\w*\b(?:\s*,\s*[a-zA-Z_]\w*\b)*)\s*[=:=]/g, m => m[1].split(',').map(p => p.trim()));
-  scan(/local\s+([a-zA-Z_]\w*\b(?:\s*,\s*[a-zA-Z_]\w*\b)+)(?!\s*[=:=])/g, m => m[1].split(',').map(p => p.trim()));
+  scan(/local\s+([a-zA-Z_]\w*\b(?:\s*,\s*[a-zA-Z_]\w*\b)*)\s*=\s*/g, m => m[1].split(',').map(p => p.trim()));
+  scan(/local\s+([a-zA-Z_]\w*\b(?:\s*,\s*[a-zA-Z_]\w*\b)+)(?!\s*=\s*)/g, m => m[1].split(',').map(p => p.trim()));
   allMatches.sort((a, b) => a.pos - b.pos);
   allMatches.forEach(({ name }) => add(name));
 
@@ -91,7 +92,7 @@ function renameVars(code, map) {
 }
 
 function resolveModule(name, fromDir) {
-  const base = path.join(fromDir, name.replace(/\./g, path.sep));
+  const base = path.join(fromDir, name.replace(/\./g, '/'));
   if (fs.existsSync(base + '.luau')) return base + '.luau';
   if (fs.existsSync(base + '.lua')) return base + '.lua';
   if (fs.existsSync(path.join(base, 'init.luau'))) return path.join(base, 'init.luau');
@@ -121,12 +122,12 @@ function processModule(filePath, modName) {
     return;
   }
 
-  content = content.replace(/\n\s*return\s+([^\n]+)\s*$/, (match, retLine) => {
-    const vals = retLine.split(',').map(v => v.trim());
+  content = content.replace(/\n(\s*)return\s+([\s\S]+?)\s*$/, (match, indent, retLine) => {
+    const vals = retLine.trim().split(',').map(v => v.trim());
     if (vals.length <= 1) {
-      return '\n_G.__modules["' + modName + '"] = ' + (vals[0] || 'nil');
+      return '\n' + indent + '_G.__modules["' + modName + '"] = ' + (vals[0] || 'nil');
     }
-    return '\n' + vals.map((v, i) => '_G.__modules["' + modName + '_' + i + '"] = ' + v).join('\n');
+    return '\n' + vals.map((v, i) => indent + '_G.__modules["' + modName + '_' + i + '"] = ' + v).join('\n');
   });
 
   content = 'do -- ' + modName + '\n' + content + '\nend';
@@ -150,13 +151,16 @@ function minify(code) {
   const map = buildRenameMap(collectLocals(code));
   code = renameVars(code, map);
   code = code.replace(/\r\n/g, '\n');
+
+  const _modRefs = [];
+  code = code.replace(/_G\.__modules\["([^"]+)"\]/g, (m) => { _modRefs.push(m); return '___M' + (_modRefs.length - 1) + '___'; });
+  code = obfuscateStrings(code);
+
   code = code.replace(/[ \t]+/g, ' ');
   code = code.replace(/\n+/g, '\n');
   code = code.replace(/\n/g, ' ');
   code = code.replace(/ +/g, ' ');
-  const _modRefs = [];
-  code = code.replace(/_G\.__modules\["([^"]+)"\]/g, (m) => { _modRefs.push(m); return '___M' + (_modRefs.length - 1) + '___'; });
-  code = obfuscateStrings(code);
+
   code = code.replace(/___M(\d+)___/g, (_, n) => _modRefs[+n]);
   return code.trim();
 }

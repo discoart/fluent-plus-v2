@@ -18,7 +18,7 @@ local function getOffset()
 	return map(viewportSizeY, 0, 2560, 8, 56)
 end
 
-local viewportPointToWorld, getOffset = unpack({ viewportPointToWorld, getOffset })
+-- viewportPointToWorld and getOffset are already defined above
 
 local BlurFolder = Instance.new("Folder")
 BlurFolder.Name = tostring(math.random(1, 99))
@@ -175,8 +175,8 @@ function AcrylicPaint()
 		}, {
 			New("ImageLabel", {
 				Image = "rbxassetid://8992230677",
-				ScaleType = "Slice",
-				SliceCenter = Rect.new(Vector2.new(99, 99), Vector2.new(99, 99)),
+				ScaleType = Enum.ScaleType.Slice,
+				SliceCenter = Rect.new(99, 99, 99, 99),
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				Size = UDim2.new(1, 120, 1, 116),
 				Position = UDim2.new(0.5, 0, 0.5, 0),
