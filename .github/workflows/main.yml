@@ -19,11 +19,23 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Set channel and filename
+        id: vars
+        run: |
+          TAG="${{ github.ref_name }}"
+          if echo "$TAG" | grep -qi beta; then
+            echo "channel=beta" >> $GITHUB_OUTPUT
+            echo "fname=fluent-plus-beta.lua" >> $GITHUB_OUTPUT
+          else
+            echo "channel=stable" >> $GITHUB_OUTPUT
+            echo "fname=fluent-plus.lua" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run
         run: |
-          node bundler.js src/entry.lua dist/bundle.lua ${{ github.ref_name }}
+          node bundler.js src/entry.lua "dist/${{ steps.vars.outputs.fname }}" ${{ github.ref_name }}
 
       - name: Upload
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/bundle.lua
+          files: dist/${{ steps.vars.outputs.fname }}
