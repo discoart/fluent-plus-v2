@@ -80,12 +80,9 @@ function buildRenameMap(names) {
 
 function renameVars(code, map) {
   const names = Object.keys(map).sort((a, b) => b.length - a.length);
-  let result = code;
-  for (const name of names) {
-    const re = new RegExp('(?<![:.])\\b' + name + '\\b', 'g');
-    result = result.replace(re, map[name]);
-  }
-  return result;
+  const escaped = names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const re = new RegExp('(?<![:.])\\b(' + escaped.join('|') + ')\\b', 'g');
+  return code.replace(re, (match) => map[match] || match);
 }
 
 function resolveModule(name, fromDir) {
@@ -125,9 +122,9 @@ function obfuscateStrings(code) {
 function minify(code) {
   code = code.replace(/--\[\[[\s\S]*?\]\]/g, '');
   code = code.replace(/--[^\r\n]*/g, '');
-  code = obfuscateStrings(code);
   const map = buildRenameMap(collectLocals(code));
   code = renameVars(code, map);
+  code = obfuscateStrings(code);
   code = code.replace(/\r\n/g, '\n');
   code = code.replace(/[ \t]+/g, ' ');
   code = code.replace(/\n+/g, '\n');
