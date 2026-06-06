@@ -25,10 +25,10 @@ jobs:
           TAG="${{ github.ref_name }}"
           if echo "$TAG" | grep -qi beta; then
             echo "channel=beta" >> $GITHUB_OUTPUT
-            echo "fname=fluent-plus-beta.lua" >> $GITHUB_OUTPUT
+            echo "fname=beta.lua" >> $GITHUB_OUTPUT
           else
             echo "channel=stable" >> $GITHUB_OUTPUT
-            echo "fname=fluent-plus.lua" >> $GITHUB_OUTPUT
+            echo "fname=stable.lua" >> $GITHUB_OUTPUT
           fi
 
       - name: Run
