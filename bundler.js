@@ -3,15 +3,13 @@ const path = require('path');
 
 const entry = process.argv[2];
 const output = process.argv[3];
-let version = process.argv[4] || 'dev';
+const version = process.argv[4] || 'dev';
+const channel = process.argv[5] || (/beta/i.test(version) ? 'beta' : 'stable');
+const displayVer = version;
 
 const seen = new Set();
 const chunks = [];
 const entryPath = path.resolve(entry);
-
-const isBeta = /-beta/i.test(version);
-const displayVer = version.replace(/-beta\.?\d*$/i, '');
-const channel = isBeta ? 'beta' : 'stable';
 
 const BANNER = `--[[
 ███████╗██╗░░░░░██╗░░░██╗███████╗███╗░░██╗████████╗  ██████╗░██╗░░░░░██╗░░░██╗░██████╗

@@ -19,11 +19,12 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Set channel and filename
+      - name: Set channel, version, filename
         id: vars
         run: |
           TAG="${{ github.ref_name }}"
-          VER=v$(cat VERSION)
+          TITLE="${{ github.event.release.name }}"
+          VER=$(echo "$TITLE" | sed -n 's/.*\[\(v[0-9][0-9.]*\)\].*/\1/p' || echo "v0.0.0")
           if echo "$TAG" | grep -qi beta; then
             echo "channel=beta" >> $GITHUB_OUTPUT
             echo "fname=beta.lua" >> $GITHUB_OUTPUT
@@ -35,10 +36,9 @@ jobs:
 
       - name: Run
         run: |
-          node bundler.js src/entry.lua "dist/${{ steps.vars.outputs.fname }}" ${{ github.ref_name }}
+          node bundler.js src/entry.lua "dist/${{ steps.vars.outputs.fname }}" ${{ steps.vars.outputs.version }} ${{ steps.vars.outputs.channel }}
 
       - name: Upload
         uses: softprops/action-gh-release@v2
         with:
           files: dist/${{ steps.vars.outputs.fname }}
-          name: ${{ steps.vars.outputs.channel }} ${{ steps.vars.outputs.version }}
