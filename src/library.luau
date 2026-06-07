@@ -126,6 +126,30 @@ local ICON_SETS = {
 		url = "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/%s.svg",
 		ext = "svg",
 	},
+	hero = {
+		url = "https://raw.githubusercontent.com/tailwindlabs/heroicons/master/src/24/outline/%s.svg",
+		ext = "svg",
+	},
+	phosphor = {
+		url = "https://raw.githubusercontent.com/phosphor-icons/core/main/assets/regular/%s.svg",
+		ext = "svg",
+	},
+	tabler = {
+		url = "https://raw.githubusercontent.com/tabler/tabler-icons/main/icons/outline/%s.svg",
+		ext = "svg",
+	},
+	bootstrap = {
+		url = "https://raw.githubusercontent.com/twbs/icons/main/icons/%s.svg",
+		ext = "svg",
+	},
+	feather = {
+		url = "https://raw.githubusercontent.com/feathericons/feather/master/icons/%s.svg",
+		ext = "svg",
+	},
+	material = {
+		url = "https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/%s.svg",
+		ext = "svg",
+	},
 }
 
 function Library:GetIcon(Name)
@@ -145,17 +169,22 @@ function Library:GetIcon(Name)
 	end
 
 	local cacheKey = setName .. "/" .. iconName
-	local cached = getIconAsset.Get(cacheKey)
-	if cached then
-		return cached
+	if getIconAsset.Has(cacheKey) then
+		return getIconAsset.Get(cacheKey)
 	end
 
 	local url = set.url:format(iconName)
 	local asset = Library:GetCustomAsset(url)
-	if asset and asset ~= "" then
-		getIconAsset.Set(cacheKey, asset)
-	end
+	getIconAsset.Set(cacheKey, asset)
 	return asset
+end
+
+function Library:PreloadIcons(names)
+	for _, name in ipairs(names) do
+		task.spawn(function()
+			self:GetIcon(name)
+		end)
+	end
 end
 
 function Library:GetCustomAsset(Value)
@@ -167,7 +196,11 @@ function Library:GetCustomAsset(Value)
 	SafeName = SafeName:gsub("[^%w%-_%.]", "_"):gsub("%.%.", "."):gsub("^%.", ""):gsub("%.$", "")
 	local ext = SafeName:match("%.(%w+)$") or "png"
 	SafeName = SafeName:gsub("%..-$", "")
-	local FileName = SafeName .. "." .. ext
+	local hash = 0
+	for i = 1, #Value do
+		hash = (hash * 31 + Value:byte(i)) % 2147483647
+	end
+	local FileName = tostring(hash) .. "_" .. SafeName .. "." .. ext
 
 	local hasFile = false
 	pcall(function()
@@ -232,6 +265,146 @@ function Library:GetCustomAsset(Value)
 		end
 	end)
 	return asset
+end
+
+local CUSTOM_THEMES_CACHE_FILE = "fluent_plus_custom_themes.json"
+
+local function getHttpService()
+	local ok, svc = pcall(function()
+		return game:GetService("HttpService")
+	end)
+	return ok and svc
+end
+
+local function jsonColorToColor3(value)
+	if type(value) ~= "table" then
+		return nil
+	end
+	local r, g, b = value.r, value.g, value.b
+	if r and g and b then
+		return Color3.fromRGB(r, g, b)
+	end
+	return nil
+end
+
+local function jsonToTheme(name, colors)
+	local theme = { Name = name }
+	for key, value in pairs(colors) do
+		if key == "AcrylicGradient" and type(value) == "table" then
+			local top = value.top or value[1] or { r = 0, g = 0, b = 0 }
+			local bottom = value.bottom or value[2] or { r = 0, g = 0, b = 0 }
+			theme[key] = ColorSequence.new(
+				Color3.fromRGB(top.r, top.g, top.b),
+				Color3.fromRGB(bottom.r, bottom.g, bottom.b)
+			)
+		elseif type(value) == "table" and value.r then
+			theme[key] = jsonColorToColor3(value)
+		else
+			theme[key] = value
+		end
+	end
+	return theme
+end
+
+Library.CustomThemes = {}
+
+local function loadCachedThemes()
+	local ok, data = pcall(function()
+		local http = getHttpService()
+		if http and isfile and isfile(CUSTOM_THEMES_CACHE_FILE) then
+			return http:JSONDecode(readfile(CUSTOM_THEMES_CACHE_FILE))
+		end
+	end)
+	return (ok and type(data) == "table" and data) or {}
+end
+
+local cachedThemes = loadCachedThemes()
+for id, themeData in pairs(cachedThemes) do
+	Library.CustomThemes[id] = jsonToTheme(themeData.name or id, themeData.colors or {})
+end
+
+local function saveCachedThemes()
+	pcall(function()
+		local http = getHttpService()
+		if http and writefile then
+			local data = {}
+			for id, theme in pairs(Library.CustomThemes) do
+				data[id] = { name = theme.Name, colors = theme._rawColors }
+			end
+			writefile(CUSTOM_THEMES_CACHE_FILE, http:JSONEncode(data))
+		end
+	end)
+end
+
+function Library:FetchTheme(id)
+	if not id or #id ~= 12 then
+		return nil, "Invalid theme ID"
+	end
+
+	if Library.CustomThemes[id] then
+		return Library.CustomThemes[id]
+	end
+
+	local url = "https://api.fluentplus.com/themes/" .. id
+	local body = nil
+
+	local http = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+	if http then
+		local ok, res = pcall(function()
+			return http({ Url = url, Method = "GET" })
+		end)
+		if ok and res and res.StatusCode == 200 and res.Body then
+			body = res.Body
+		end
+	end
+
+	if not body then
+		local ok, res = pcall(game.HttpGet, game, url)
+		if ok then
+			body = res
+		end
+	end
+
+	if not body then
+		return nil, "Network error"
+	end
+
+	local httpService = getHttpService()
+	if not httpService then
+		return nil, "HttpService unavailable"
+	end
+
+	local ok, data = pcall(function()
+		return httpService:JSONDecode(body)
+	end)
+	if not ok or not data or not data.colors then
+		return nil, "Invalid response from server"
+	end
+
+	local theme = jsonToTheme(data.name or id, data.colors)
+	theme._rawColors = data.colors
+	Library.CustomThemes[id] = theme
+	saveCachedThemes()
+	return theme
+end
+
+function Library:ApplyCustomTheme(id)
+	local theme, err = self:FetchTheme(id)
+	if not theme then
+		return false, err
+	end
+
+	local Creator = self.Creator
+	if not Creator then
+		return false, "Library not initialized"
+	end
+
+	Creator.Themes[id] = theme
+	if not table.find(self.Themes, id) then
+		table.insert(self.Themes, id)
+	end
+	self:SetTheme(id)
+	return true
 end
 
 return Library

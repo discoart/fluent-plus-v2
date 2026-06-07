@@ -245,10 +245,6 @@ Library.CreateWindow = function(self, Config)
 	Library.Font = Config.Font or Library.Font
 	Library.Creator.RandomNames = Config.RandomNames or false
 
-	if Config.BackgroundImage == nil then
-		Config.BackgroundImage = "rbxassetid://13196113628"
-	end
-
 	if Config.BackgroundTransparency == nil then
 		Config.BackgroundTransparency = 0.5
 	end

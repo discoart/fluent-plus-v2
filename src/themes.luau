@@ -58,6 +58,8 @@ local Themes = {
 		SubText = Color3.fromRGB(170, 170, 170),
 		Hover = Color3.fromRGB(120, 120, 120),
 		HoverChange = 0.07,
+		UseBackground = true,
+		BackgroundImage = "rbxassetid://13196113628",
 	},
 	Darker = {
 		Name = "Darker",

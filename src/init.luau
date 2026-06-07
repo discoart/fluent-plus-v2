@@ -131,6 +131,11 @@ function Library:CreateMinimizer(Config)
 
 	local isMobile = Mobile and true or false
 
+	Library:PreloadIcons({
+		"moon", "x", "minus", "maximize-2", "minimize-2",
+		"search", "chevron-right", "chevron-down", "monitor-off",
+	})
+
 	local iconAsset = Library:GetIcon("moon")
 
 	if type(Config.Icon) == "string" and Config.Icon ~= "" then
@@ -392,12 +397,37 @@ function Library:CreateMinimizer(Config)
 end
 
 function Library:SetTheme(Value)
-	if Library.Window and table.find(Library.Themes, Value) then
-		Library.Theme = Value
-		Creator.Theme = Value
-		Creator.UpdateTheme()
-		Library:RefreshOpenDropdowns()
+	if not Library.Window then
+		return
 	end
+
+	local themeData = Themes[Value] or Library.CustomThemes[Value]
+	if not themeData and not table.find(Library.Themes, Value) then
+		return
+	end
+
+	Library.Theme = Value
+	if themeData then
+		if themeData.UseBackground then
+			if themeData.BackgroundVideo then
+				Library.Window:SetBackgroundVideo(themeData.BackgroundVideo)
+			elseif themeData.BackgroundImage then
+				local asset = Library:GetCustomAsset(themeData.BackgroundImage)
+				if asset and asset ~= "" then
+					Library.Window:SetBackgroundImage(asset)
+				end
+			end
+		else
+			Library.Window:ClearBackground()
+		end
+	end
+
+	if Library.CustomThemes[Value] and not Creator.Themes[Value] then
+		Creator.Themes[Value] = themeData
+	end
+	Creator.Theme = Value
+	Creator.UpdateTheme()
+	Library:RefreshOpenDropdowns()
 end
 
 function Library:Destroy()

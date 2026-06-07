@@ -1269,6 +1269,42 @@ return function(Components)
 				Library:RefreshOpenDropdowns()
 			end
 
+			function Window:ClearBackground()
+				if Window.BackgroundImage then
+					Window.BackgroundImage:Destroy()
+					Window.BackgroundImage = nil
+				end
+				if Window.BackgroundVideo then
+					Window.BackgroundVideo:Destroy()
+					Window.BackgroundVideo = nil
+				end
+				Window.BackgroundImageTransparency = nil
+			end
+
+			function Window:SetBackgroundVideo(videoUrl, transparency)
+				self:ClearBackground()
+
+				local asset = Library:GetCustomAsset(videoUrl)
+				if asset == nil or asset == "" then
+					return
+				end
+
+				Window.BackgroundVideo = New("VideoFrame", {
+					Name = "BackgroundVideo",
+					Size = UDim2.fromScale(1, 1),
+					Position = UDim2.fromOffset(0, 0),
+					BackgroundTransparency = 1,
+					Video = asset,
+					Looped = true,
+					Volume = 0,
+					Playing = true,
+					ZIndex = 0,
+					Parent = Window.Root,
+				})
+
+				Library:RefreshOpenDropdowns()
+			end
+
 			local DialogModule = Components.Dialog:Init(Window)
 			function Window:Dialog(Config)
 				local Dialog = DialogModule:Create()

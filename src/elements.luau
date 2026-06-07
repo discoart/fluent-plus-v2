@@ -2300,5 +2300,140 @@ ElementsTable.Discord = (function()
 
 	return Element
 end)()
+ElementsTable.CustomTheme = (function()
+	local Element = {}
+	Element.__index = Element
+	Element.__type = "CustomTheme"
+
+	function Element:New(Idx, Config)
+		if type(Idx) == "table" then
+			Config = Idx
+			Idx = nil
+		end
+		Config = Config or {}
+
+		local CustomTheme = {
+			Type = "CustomTheme",
+		}
+
+		local ThemeFrame = Components.Element("Custom Theme", "Enter your 12-character theme code", self.Container, false, Config)
+		ThemeFrame.TitleHolder.Size = UDim2.new(1, -180, 0, 16)
+		if ThemeFrame.DescLabel then
+			ThemeFrame.DescLabel.Size = UDim2.new(1, -180, 0, 16)
+		end
+
+		local Textbox = Components.Textbox(ThemeFrame.Frame, false)
+		Textbox.Frame.Position = UDim2.new(1, -75, 0.5, 0)
+		Textbox.Frame.AnchorPoint = Vector2.new(1, 0.5)
+		Textbox.Frame.Size = UDim2.fromOffset(120, 30)
+		Textbox.Input.Text = ""
+		Textbox.Input.PlaceholderText = "e.g. a7K3xR9mP2qL"
+		Textbox.Input.ClearTextOnFocus = false
+		Textbox.Input.MaxLength = 12
+
+		local ApplyButton = New("TextButton", {
+			Size = UDim2.fromOffset(55, 24),
+			Position = UDim2.new(1, -10, 0.5, 0),
+			AnchorPoint = Vector2.new(1, 0.5),
+			BackgroundTransparency = 0.88,
+			Text = "Apply",
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			TextSize = 12,
+			FontFace = resolveFont(Library.Font, Enum.FontWeight.Medium),
+			Parent = ThemeFrame.Frame,
+			AutoButtonColor = false,
+			ThemeTag = {
+				BackgroundColor3 = "Element",
+			},
+		}, {
+			New("UICorner", { CornerRadius = UDim.new(0, 6) }),
+		})
+
+		local StatusLabel = New("TextLabel", {
+			Size = UDim2.new(0, 180, 0, 14),
+			Position = UDim2.new(0, 12, 1, 4),
+			BackgroundTransparency = 1,
+			Text = "",
+			TextSize = 11,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			FontFace = resolveFont(Library.Font),
+			Parent = ThemeFrame.Frame,
+			ThemeTag = {
+				TextColor3 = "SubText",
+			},
+		})
+
+		local Instructions = New("TextLabel", {
+			Size = UDim2.new(1, -12, 0, 14),
+			Position = UDim2.new(0, 6, 1, 20),
+			BackgroundTransparency = 1,
+			Text = "Create your own theme at fluentplus.com/themes",
+			TextSize = 11,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			FontFace = resolveFont(Library.Font),
+			Parent = ThemeFrame.Frame,
+			ThemeTag = {
+				TextColor3 = "SubText",
+			},
+		})
+
+		AddSignal(ApplyButton.MouseEnter, function()
+			TweenService:Create(ApplyButton, TweenInfo.new(0.15), {
+				BackgroundTransparency = 0.82
+			}):Play()
+		end)
+		AddSignal(ApplyButton.MouseLeave, function()
+			TweenService:Create(ApplyButton, TweenInfo.new(0.15), {
+				BackgroundTransparency = 0.88
+			}):Play()
+		end)
+
+		AddSignal(ApplyButton.MouseButton1Click, function()
+			local code = Textbox.Input.Text:match("^([a-zA-Z0-9]+)$")
+			if not code or #code ~= 12 then
+				StatusLabel.TextColor3 = Color3.fromRGB(255, 140, 140)
+				StatusLabel.Text = "Invalid code. Must be 12 characters (a-z, A-Z, 0-9)."
+				return
+			end
+
+			ApplyButton.Text = "..."
+			ApplyButton.Active = false
+			StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+			StatusLabel.Text = "Loading..."
+
+			task.spawn(function()
+				local success, err = Library:ApplyCustomTheme(code)
+				ApplyButton.Text = "Apply"
+				ApplyButton.Active = true
+
+				if success then
+					StatusLabel.TextColor3 = Color3.fromRGB(100, 220, 140)
+					StatusLabel.Text = "Theme applied!"
+					Textbox.Input.Text = code
+				else
+					StatusLabel.TextColor3 = Color3.fromRGB(255, 140, 140)
+					StatusLabel.Text = err or "Failed to load theme."
+				end
+			end)
+		end)
+
+		function CustomTheme:Destroy()
+			ThemeFrame:Destroy()
+			if Idx then
+				Library.Options[Idx] = nil
+			end
+		end
+
+		CustomTheme.Visible = ThemeFrame.Visible
+		CustomTheme.Elements = ThemeFrame
+
+		if Idx then
+			Library.Options[Idx] = CustomTheme
+		end
+		return CustomTheme
+	end
+
+	return Element
+end)()
 
 return ElementsTable
