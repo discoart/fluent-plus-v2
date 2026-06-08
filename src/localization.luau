@@ -128,6 +128,20 @@ function Localization:unregister(instance)
 	self.Registry[instance] = nil
 end
 
+local function showNotify(title, content, subContent, duration)
+	local ok = pcall(function()
+		if Library and Library.SafeCallback then
+			Library:Notify({
+				Title = title,
+				Content = content,
+				SubContent = subContent,
+				Duration = duration or 5,
+			})
+		end
+	end)
+	return ok
+end
+
 function Localization:setLanguage(code)
 	self.CurrentLanguage = code
 	Translator.DefaultTarget = code
@@ -156,15 +170,17 @@ function Localization:translateAll()
 			end
 		end
 
+		local failed = 0
 		if count > 0 then
 			for key, original in pairs(pending) do
 				local ok, result = pcall(function()
 					return Translator:Translate(original, self.CurrentLanguage)
 				end)
-				if ok and result then
+				if ok and result and result ~= "" then
 					self.TranslationCache[key] = result
 				else
 					self.TranslationCache[key] = original
+					failed = failed + 1
 				end
 			end
 		end
@@ -178,6 +194,22 @@ function Localization:translateAll()
 					end)
 				end
 			end
+		end
+
+		if failed > 0 then
+			showNotify(
+				"Translation",
+				"Failed to translate " .. failed .. " text(s)",
+				"Some texts kept original language. Check network or try another provider.",
+				6
+			)
+		elseif count > 0 then
+			showNotify(
+				"Language",
+				"Changed to " .. self.CurrentLanguage:upper(),
+				"All interface texts have been translated.",
+				3
+			)
 		end
 
 		for _, callback in ipairs(self.Callbacks) do
