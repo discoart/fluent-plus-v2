@@ -1,6 +1,7 @@
 local Creator = require("creator")
 local Library = require("library")
 local Flipper = require("flipper")
+local Localization = require("localization")
 local resolveFont = Creator.resolveFont
 local UserInputService = game:GetService("UserInputService")
 
@@ -548,6 +549,7 @@ return function(Components)
 				TextColor3 = "Text",
 			},
 		})
+		Localization:registerText(Tab.TitleLabel, "Text", Title)
 
 		Tab.TitleHolder = New("Frame", {
 			AnchorPoint = Vector2.new(0, 0.5),
@@ -815,19 +817,19 @@ return function(Components)
 						ImageColor3 = "Text",
 					},
 				}) or nil,
-				New("TextLabel", {
-					Text = Title,
-					RichText = true,
-					TextColor3 = Color3.fromRGB(255, 255, 255),
-					TextTransparency = 0,
-					FontFace = resolveFont(Library.Font),
-					TextSize = 12,
-					TextXAlignment = "Left",
-					TextYAlignment = "Center",
-					Size = UDim2.new(0, 0, 1, 0),
-					AutomaticSize = Enum.AutomaticSize.X,
-					BackgroundTransparency = 1,
-					LayoutOrder = 2,
+			local SubTabLabel = New("TextLabel", {
+				Text = Title,
+				RichText = true,
+				TextColor3 = Color3.fromRGB(255, 255, 255),
+				TextTransparency = 0,
+				FontFace = resolveFont(Library.Font),
+				TextSize = 12,
+				TextXAlignment = "Left",
+				TextYAlignment = "Center",
+				Size = UDim2.new(0, 0, 1, 0),
+				AutomaticSize = Enum.AutomaticSize.X,
+				BackgroundTransparency = 1,
+				LayoutOrder = 2,
 					ThemeTag = {
 						TextColor3 = "Text",
 					},
@@ -935,6 +937,7 @@ return function(Components)
 			local SubTab = {
 				Type = "SubTab",
 				Name = Title,
+				TitleLabel = SubTabLabel,
 				Button = SubTabButton,
 				Container = SubTabContainer,
 				ContainerAnim = SubTabContainerAnim,
@@ -944,6 +947,7 @@ return function(Components)
 				Selected = false,
 				Parent = self,
 			}
+			Localization:registerText(SubTabLabel, "Text", Title)
 
 			self.SubTabs[SubTabIndex] = SubTab
 			self.SubTabContainers[SubTabIndex] = SubTabContainerAnim

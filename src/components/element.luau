@@ -1,6 +1,7 @@
 local Creator = require("creator")
 local Library = require("library")
 local Flipper = require("flipper")
+local Localization = require("localization")
 local resolveFont = Creator.resolveFont
 
 return function(Components)
@@ -140,6 +141,7 @@ return function(Components)
 
 			function Element:SetTitle(Set)
 				Element.TitleLabel.Text = Set
+				Localization:registerText(Element.TitleLabel, "Text", Set)
 				local hasTitle = (Set ~= nil and Set ~= "")
 				Element.Header.Visible = hasTitle
 
@@ -225,6 +227,7 @@ return function(Components)
 					Element.DescLabel.Visible = true
 				end
 				Element.DescLabel.Text = Set
+				Localization:registerText(Element.DescLabel, "Text", Set)
 				if Library.Window and Library.Window.AllElements and Library.Window.AllElements[Element.Frame] then
 					Library.Window.AllElements[Element.Frame].description = Set
 				elseif Library.Windows and #Library.Windows > 0 then

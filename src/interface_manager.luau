@@ -12,6 +12,7 @@ local Mobile = table.find({Enum.Platform.IOS, Enum.Platform.Android}, UserInputS
 
 local Components = require("components")
 local Library = require("library")
+local Localization = require("localization")
 
 local InterfaceManager = {} do
 	InterfaceManager.Folder = ("%s%s"):format("Fluent", "Settings")
@@ -50,7 +51,9 @@ local InterfaceManager = {} do
 
 		Transparency = true,
 
-		MenuKeybind = "M"
+		MenuKeybind = "M",
+
+		Language = "en",
 
 	}
 
@@ -151,6 +154,29 @@ local InterfaceManager = {} do
 		})
 
 		InterfaceTheme:SetValue(Settings.Theme)
+
+		local LanguageDropdown = section:AddDropdown("InterfaceLanguage", {
+			Title = "Language",
+			Description = "Changes the interface language.",
+			Values = Localization:getLanguageValues(),
+			Default = Localization:formatLanguage({ Code = Settings.Language, Name = string.upper(Settings.Language) }),
+			Callback = function(Value)
+				local lang = Localization:findByFormatted(Value)
+				Settings.Language = lang.Code
+				Localization:setLanguage(lang.Code)
+				InterfaceManager:SaveSettings()
+			end
+		})
+
+		if Settings.Language ~= "en" then
+			local formatted = Localization:formatLanguage({ Code = Settings.Language, Name = string.upper(Settings.Language) })
+			for _, v in ipairs(Localization:getLanguageValues()) do
+				if v == formatted then
+					LanguageDropdown:SetValue(formatted)
+					break
+				end
+			end
+		end
 
 		if Library.UseAcrylic and not Mobile then
 

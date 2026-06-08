@@ -1,5 +1,6 @@
 local Creator = require("creator")
 local Library = require("library")
+local Localization = require("localization")
 local resolveFont = Creator.resolveFont
 
 return function(Components)
@@ -107,7 +108,8 @@ return function(Components)
 						},
 					}) or nil,
 
-					not Config.Window.TabsInHeader and New("TextLabel", {
+				not Config.Window.TabsInHeader and (function()
+					local lbl = New("TextLabel", {
 						RichText = true,
 						Text = Config.Title,
 						FontFace = resolveFont(Library.Font),
@@ -121,7 +123,10 @@ return function(Components)
 						ThemeTag = {
 							TextColor3 = "Text",
 						},
-					}) or nil,
+					})
+					Localization:registerText(lbl, "Text", Config.Title)
+					return lbl
+				end)() or nil,
 					not Config.Window.TabsInHeader and Config.SubTitle and New("TextLabel", {
 						RichText = true,
 						Text = Config.SubTitle,

@@ -49,6 +49,10 @@ return function(Components)
 
 			Library.Window = Window
 
+			if Config.Translator then
+				require("translation"):Configure(Config.Translator)
+			end
+
 			local Dragging = false
 			local DragInput, MousePos, StartPos
 			local Resizing = false

@@ -37,6 +37,8 @@ local ElementsTable = require("elements")
 local Elements = require("elements_registry")
 local SaveManager = require("save_manager")
 local InterfaceManager = require("interface_manager")
+local Translator = require("translation")
+local Localization = require("localization")
 
 local ZINDEX_BASE = 10000000 
 Library.ZIndexLayers = {
@@ -947,14 +949,18 @@ Creator.AddSignal(MobileMinimizeButton.MouseButton1Click, function()
 
 end)
 
+Library.Translator = Translator
+
 local Fluent = Library
 if Library.ExposeGlobals then
 	_G.Fluent = Library
 	_G.SaveManager = SaveManager
 	_G.InterfaceManager = InterfaceManager
+	_G.Translator = Translator
+	_G.Localization = Localization
 end
 
 SaveManager:SetLibrary(Library)
 InterfaceManager:SetLibrary(Library)
 
-return Library, SaveManager, InterfaceManager, Mobile
+return Library, SaveManager, InterfaceManager, Mobile, Translator, Localization

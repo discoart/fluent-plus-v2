@@ -1,5 +1,6 @@
 local Creator = require("creator")
 local Library = require("library")
+local Localization = require("localization")
 local resolveFont = Creator.resolveFont
 
 return function(Components)
@@ -60,6 +61,7 @@ return function(Components)
 				},
 			})
 			Section.TitleLabel.Parent = SectionHeader
+			Localization:registerText(Section.TitleLabel, "Text", Title)
 			Creator.SetupMarquee(Section.TitleLabel)
 
 			Section.Root = New("Frame", {
